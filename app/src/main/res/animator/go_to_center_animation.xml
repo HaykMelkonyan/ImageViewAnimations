@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:ordering="sequentially">
+
+    <objectAnimator
+        android:duration="300"
+        android:propertyName="X"
+        android:valueFrom="0%p"
+        android:valueTo="50%p"
+        android:valueType="intType"/>
+
+    <objectAnimator
+        android:duration="300"
+        android:propertyName="Y"
+        android:valueFrom="0%p"
+        android:valueTo="100%p"
+        android:valueType="intType"/>
+</set>
