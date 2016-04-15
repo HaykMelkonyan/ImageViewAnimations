@@ -2,6 +2,7 @@ package com.example.user.imageviewanimations;
 
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,11 +15,13 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -36,8 +39,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int SELECT_IMAGE = 100;
     private static final int REQUEST_FOR_SHARE=111;
     private static  int current_index;
-    private static int center_index=-1;
 
+
+    int center_index=-1;
     private int imageViewHeight;
     ArrayList<ImageView> imageViewList = new ArrayList<ImageView>() ;
     ArrayList<String> pathList= new ArrayList<String>();
@@ -45,42 +49,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        final int screen_width = size.x;
-        final int screen_height = size.y;
+
+
+
         setContentView(R.layout.activity_main);
         current_index=0;
-        ImageView.OnClickListener listener= new ImageView.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-
-                if(center_index!=-1)
-                {
-
-                    Animation resize= AnimationUtils.loadAnimation(getApplicationContext(),R.anim.undo_resize_animation);
-                  // imageViewList.get(center_index).startAnimation(resize);
-                    Animation from_center = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.from_center);
-                   imageViewList.get(center_index).startAnimation(from_center);
-                    AnimationSet set= new AnimationSet(true);
-
-
-                }
-                ImageView img= (ImageView) v;
-                   AnimationSet set= new AnimationSet(true);
-                Animation animation_to_center = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.to_center);
-               img.startAnimation(animation_to_center);
-                Animation resize= AnimationUtils.loadAnimation(getApplicationContext(), R.anim.resize_animation);
-                // img.startAnimation(resize);
-
-
-                center_index= imageViewList.indexOf(img);
-
-
-            }
-            };
         ImageView img1= (ImageView)findViewById(R.id.image1);
         ImageView img2= (ImageView)findViewById(R.id.image2);
         ImageView img3= (ImageView)findViewById(R.id.image3);
@@ -93,7 +67,56 @@ public class MainActivity extends AppCompatActivity {
         pathList.add(IMAGE2_PATH);
         pathList.add(IMAGE3_PATH);
         pathList.add(IMAGE4_PATH);
-        imageViewHeight=80;// img1.getHeight();
+        Display display = getWindowManager().getDefaultDisplay();
+        final Point size = new Point();
+        display.getSize(size);
+        imageViewHeight=(int)(80 * getApplicationContext().getResources().getDisplayMetrics().density);
+        final int center_x = size.x/2-imageViewHeight/2;
+        final int center_y = size.y/2-imageViewHeight/2;
+
+        ImageView.OnClickListener listener= new ImageView.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+
+                if (center_index!=-1)
+                {
+                    ImageView currImage= imageViewList.get(center_index);
+                    ObjectAnimator animteXCenter= ObjectAnimator.ofFloat(currImage,"X",center_index*imageViewHeight+ center_index*7);
+                    ObjectAnimator animeYCenter=ObjectAnimator.ofFloat(currImage, "Y", 5);
+                    ObjectAnimator scaleX= ObjectAnimator.ofFloat(currImage,"scaleX",1.0f);
+                    scaleX.setRepeatCount(0);
+                    ObjectAnimator scaleY= ObjectAnimator.ofFloat(currImage,"scaleY",1.0f);
+                    scaleY.setRepeatCount(0);
+                    AnimatorSet settoCenter= new AnimatorSet();
+                    settoCenter.playTogether(animeYCenter, animteXCenter);
+                    AnimatorSet scaleXY= new AnimatorSet();
+                    scaleXY.playTogether(scaleX,scaleY);
+                    AnimatorSet sss= new AnimatorSet();
+                    sss.play(scaleXY).before(settoCenter);
+                    sss.start();
+                }
+
+               ImageView currImage= (ImageView)v;
+               ObjectAnimator animteXCenter= ObjectAnimator.ofFloat(currImage,"X",center_x);
+               ObjectAnimator animeYCenter=ObjectAnimator.ofFloat(currImage, "Y", center_y);
+               ObjectAnimator scaleX= ObjectAnimator.ofFloat(currImage,"scaleX",2.5f);
+               ObjectAnimator scaleY= ObjectAnimator.ofFloat(currImage,"scaleY",2.5f);
+               AnimatorSet settoCenter= new AnimatorSet();
+               settoCenter.playTogether(animeYCenter, animteXCenter);
+               AnimatorSet scaleXY= new AnimatorSet();
+               scaleXY.playTogether(scaleX,scaleY);
+               AnimatorSet sss= new AnimatorSet();
+               sss.play(settoCenter).before(scaleXY);
+               sss.start();
+                center_index= imageViewList.indexOf(currImage);
+
+
+            }
+            };
+
+        // img1.getHeight();
         for (ImageView item : imageViewList)
         {
             item.setOnClickListener(listener);
